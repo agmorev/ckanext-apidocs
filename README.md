@@ -44,11 +44,13 @@ To install ckanext-apidocs:
    config file (by default the config file is located at
    `/etc/ckan/default/ckan.ini`).
 
-3. Add link `apidocs` to the appropriate place on the site, like this:
+4. Add link `apidocs` to the appropriate place on the site, like this:
 
     ```<a href="{{ h.url_for('apidocs.index') }}">{{ _('CKAN API') }}</a>```
 
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+5. `apidocs` page is available on the URL `https://<hostname>/api/docs/`
+
+6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
 
      sudo service apache2 reload
 
