@@ -16,6 +16,10 @@
 #swagger-ui .information-container .info {
   margin: 20px 0;
 }
+#swagger-ui .information-container .info .main {
+  min-height: unset;
+  background: #eee url(../../../base/images/bg.png);
+}
 #swagger-ui .scheme-container {
   display: none;
 }
@@ -25,4 +29,10 @@
 #swagger-ui .topbar .wrapper{
   background: #000;
   border: none;
+}
+.swagger-ui table {
+  width: unset !important;
+}
+.swagger-ui .opblock-body select {
+  height: auto;
 }

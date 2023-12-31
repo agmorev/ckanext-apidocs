@@ -1,11 +1,7 @@
-import os
 import json
 
-from typing import Optional
-
-from flask import Blueprint, render_template, request
-
-from ckan.types import Response
+from flask import Blueprint, render_template
+from flask.wrappers import Response
 
 
 apidocs = Blueprint("apidocs", __name__, url_prefix="/api/docs/")
@@ -26,11 +22,11 @@ fields = {
 }
 
 
-def index(path: Optional[str]=None) -> Response:
+def index() -> Response:
     fields["config_json"] = json.dumps(config)
     return render_template("apidocs/index.html", **fields)
 
-apidocs.add_url_rule("/", view_func=index, methods=['GET', 'POST'])
+apidocs.add_url_rule("/", view_func=index)
 
 
 def get_blueprints():
