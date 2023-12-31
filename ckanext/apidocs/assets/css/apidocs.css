@@ -36,3 +36,6 @@
 .swagger-ui .opblock-body select {
   height: auto;
 }
+.swagger-ui .topbar .download-url-wrapper input[type=text] {
+  height: auto;
+}
