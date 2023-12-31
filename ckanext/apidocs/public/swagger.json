@@ -1,0 +1,2447 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CKAN API",
+    "description": "This section documents CKAN APIs for developers who want to write code that interacts with CKAN site and its data.<br>CKAN’s Action API is a powerful, RPC-style API that exposes all of CKAN’s core features to API clients. All of a CKAN website’s core functionality (everything you can do with the web interface and more) can be used by external code that calls the CKAN API.<br><a href='https://docs.ckan.org/en/2.10/api/index.html#action-api-reference'>Find out more about CKAN API</a>",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about OpenAPI",
+      "url": "https://spec.openapis.org/oas/v3.1.0"
+  },
+  "servers": [
+    {
+      "url": "/api/3/action"
+    }
+  ],
+  "tags": [
+    {
+      "name": "LIST",
+      "description": "API functions for getting LIST of data from CKAN",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://docs.ckan.org/en/2.10/api/index.html#module-ckan.logic.action.get"
+      }
+    },
+    {
+      "name": "SHOW",
+      "description": "API functions for getting certain data from CKAN",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://docs.ckan.org/en/2.10/api/index.html#module-ckan.logic.action.get"
+      }
+    },
+    {
+      "name": "SEARCH",
+      "description": "API functions for searching data from CKAN",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://docs.ckan.org/en/2.10/api/index.html#module-ckan.logic.action.get"
+      }
+    },
+    {
+      "name": "HELP",
+      "description": "API functions for getting help and config information",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://docs.ckan.org/en/2.10/api/index.html#module-ckan.logic.action.get"
+      }
+    }
+  ],
+  "paths": {
+
+    "/package_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of packages",
+        "description": "<b>ckan.logic.action.get.package_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[str]</i></p>Return a list of the names of the site’s datasets (packages)<br><b>Return type:</b> list of strings",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.package_list"
+        },
+        "operationId": "package_list",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "if given, the list of datasets will be broken into pages of at most limit datasets per page and only one page will be returned at a time (optional)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "when limit is given, the offset to start returning packages from",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=package_list",
+                      "type": "string"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/current_package_list_with_resources": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a current list of packages with resources",
+        "description": "<p><b>ckan.logic.action.get.current_package_list_with_resources</b><i>(context: Context, data_dict: dict[str, Any])→ List[dict[str, Any]]</i></p>Return a list of the site’s datasets (packages) and their resources<br><b>Return type:</b> list of dictionaries",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.current_package_list_with_resources"
+        },
+        "operationId": "current_package_list_with_resources",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "if given, the list of datasets will be broken into pages of at most limit datasets per page and only one page will be returned at a time (optional)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "when limit is given, the offset to start returning packages from",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "when limit is given, which page to return, (deprecated: use offset)",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=current_package_list_with_resources",
+                      "type": "string",
+                      "example": "http://localhost:5000/api/3/action/help_show?name=current_package_list_with_resources"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/Package"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/member_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get all members of a group",
+        "description": "<p><b>ckan.logic.action.get.member_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[Tuple[Any, ...]]</i></p>Return the members of a group.<br>The user must have permission to 'get' the group.<br><b>Return type:</b> list of (id, type, capacity) tuples.<br><b>Raises: ckan.logic.NotFound</b> if the group doesn’t exist",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.member_list"
+        },
+        "operationId": "member_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the id or name of the group",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "object_type",
+            "in": "query",
+            "description": "restrict the members returned to those of a given type, e.g. 'user' or 'package' (optional, default: None)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "capacity",
+            "in": "query",
+            "description": "restrict the members returned to those with a given capacity, e.g. 'member', 'editor', 'admin', 'public', 'private' (optional, default: None)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=member_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=member_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/package_collaborator_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get all collaborators of a given package",
+        "description": "<p><b>ckan.logic.action.get.package_collaborator_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[dict[str, Any]]</i></p>Return the list of all collaborators for a given package.<br>Currently you must be an Admin on the package owner organization to manage collaborators.<br>Note: This action requires the collaborators feature to be enabled with the `ckan.auth.allow_dataset_collaborators` configuration option.<br><b>Return type:</b> list of dictionaries (a list of collaborators, each a dict including the package and user id, the capacity and the last modified date).",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.package_collaborator_list"
+        },
+        "operationId": "package_collaborator_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` or `name` of the package",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "capacity",
+            "in": "query",
+            "description": "if provided, only users with this capacity are returned (optional)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=package_collaborator_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=package_collaborator_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/group_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of groups",
+        "description": "<p><b>ckan.logic.action.get.group_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[dict[str, Any]]</i></p>Return a list of the names of the site’s groups.<br><b>Return type:</b> list of strings.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.group_list"
+        },
+        "operationId": "group_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "the type of group to list (optional, default: <i>`group`</i>), See docs for <b>IGroupForm</b>",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "the field to sort the list by, must be <i>`name`</i> or <i>`packages`</i> (optional, default: <i>`name`</i>) Deprecated use sort.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "sorting of the search results. Optional. Default: <i>`title asc`</i> string of field name and sort-order. The allowed fields are <i>`name`</i>, <i>`package_count`</i> and <i>`title`</i>",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "the maximum number of groups returned (optional) Default: <b>1000</b> when <i>`all_fields=false`</i> unless set in site’s configuration <i>`ckan.group_and_organization_list_max`</i> Default: <b>25</b> when <i>`all_fields=true`</i> unless set in site’s configuration <i>`ckan.group_and_organization_list_all_fields_max`</i>",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "when limit is given, the offset to start returning groups from",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "groups",
+            "in": "query",
+            "description": "a list of names of the groups to return, if given only groups whose names are in this list will be returned (optional)",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "all_fields",
+            "in": "query",
+            "description": "return group dictionaries instead of just names. Only core fields are returned - get some more using the include_* options. Returning a list of packages is too expensive, so the packages property for each group is deprecated, but there is a count of the packages in the <i>`package_count`</i> property. (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_dataset_count",
+            "in": "query",
+            "description": "if `all_fields`, include the full <i>`package_count`</i> (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_extras",
+            "in": "query",
+            "description": "if `all_fields`, include the group extra fields (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_tags",
+            "in": "query",
+            "description": "if `all_fields`, include the group tags (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_groups",
+            "in": "query",
+            "description": "if `all_fields`, include the groups the groups are in (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_users",
+            "in": "query",
+            "description": "if `all_fields`, include the group users (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=group_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=group_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/organization_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of organizations",
+        "description": "<p><b>ckan.logic.action.get.organization_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[dict[str, Any]]</i></p>Return a list of the names of the site’s organizations.<br><b>Return type:</b> list of strings.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.organization_list"
+        },
+        "operationId": "organization_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "the type of organization to list (optional, default: <i>`organization`</i>), See docs for <b>IGroupForm</b>",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "the field to sort the list by, must be <i>`name`</i> or <i>`packages`</i> (optional, default: <i>`name`</i>) Deprecated use sort.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "sorting of the search results. Optional. Default: <i>`title asc`</i> string of field name and sort-order. The allowed fields are <i>`name`</i>, <i>`package_count`</i> and <i>`title`</i>",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "the maximum number of organizations returned (optional) Default: <b>1000</b> when <i>`all_fields=false`</i> unless set in site’s configuration <i>`ckan.group_and_organization_list_max`</i> Default: <b>25</b> when <i>`all_fields=true`</i> unless set in site’s configuration <i>`ckan.group_and_organization_list_all_fields_max`</i>",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "when limit is given, the offset to start returning organizations from",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "organizations",
+            "in": "query",
+            "description": "a list of names of the organizations to return, if given only organizations whose names are in this list will be returned (optional)",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "all_fields",
+            "in": "query",
+            "description": "return organization dictionaries instead of just names. Only core fields are returned - get some more using the include_* options. Returning a list of packages is too expensive, so the packages property for each organization is deprecated, but there is a count of the packages in the <i>`package_count`</i> property. (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_dataset_count",
+            "in": "query",
+            "description": "if `all_fields`, include the full <i>`package_count`</i> (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_extras",
+            "in": "query",
+            "description": "if `all_fields`, include the group extra fields (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_tags",
+            "in": "query",
+            "description": "if `all_fields`, include the group tags (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_groups",
+            "in": "query",
+            "description": "if `all_fields`, include the groups the groups are in (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_users",
+            "in": "query",
+            "description": "if `all_fields`, include the group users (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/license_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of licenses",
+        "description": "<p><b>ckan.logic.action.get.license_list</b><i>(context: Context, data_dict: dict[str, Any])→ List[dict[str, Any]]</i></p>Return the list of licenses available for datasets on the site.<br><b>Return type:</b> list of dictionaries.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.license_list"
+        },
+        "operationId": "license_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=license_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=license_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/License"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/tag_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of tags",
+        "description": "<p><b>ckan.logic.action.get.tag_list</b><i>(context: Context, data_dict: dict[str, Any])→ Union[List[dict[str, Any]], List[str]]</i></p>Return the list of tags available for datasets on the site.<br><b>Return type:</b> list of dictionaries.<br>By default only free tags (tags that don’t belong to a vocabulary) are returned. If the <i>vocabulary_id</i> argument is given then only tags belonging to that vocabulary will be returned instead.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.tag_list"
+        },
+        "operationId": "tag_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "a tag name query to search for, if given only tags whose names contain this string will be returned (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "vocabulary_id",
+            "in": "query",
+            "description": "the `id` or `name` of a vocabulary, if give only tags that belong to this vocabulary will be returned (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "all_fields",
+            "in": "query",
+            "description": "return full tag dictionaries instead of just names (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/Tag"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/user_list": {
+      "get": {
+        "tags": [
+          "LIST"
+        ],
+        "summary": "Get a list of users",
+        "description": "<p><b>ckan.logic.action.get.user_list</b><i>(context: Context, data_dict: DataDict)→ ActionResult.UserList</i></p>Return a list of the site’s user accounts.<br><b>Return type:</b> list of user dictionaries.<br>User properties include: <i>number_created_packages</i> which excludes datasets which are private or draft state.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.user_list"
+        },
+        "operationId": "user_list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "filter the users returned to those whose names contain a string (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "filter the users returned to those whose email match a string (optional) (you must be a sysadmin to use this filter)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "which field to sort the list by (optional, default: <i>`display_name`</i>). Users can be sorted by <i>`id`</i>, <i>`name`</i>, <i>`fullname`</i>, <i>`display_name`</i>, <i>`created`</i>, <i>`about`</i>, <i>`sysadmin`</i> or <i>`number_created_packages`</i>.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "all_fields",
+            "in": "query",
+            "description": "return full user dictionaries instead of just names. (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_site_user",
+            "in": "query",
+            "description": "add `site_user` to the result (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=user_list",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=user_list"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/package_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get a package data",
+        "description": "<p><b>ckan.logic.action.get.package_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return the metadata of a dataset (package) and its resources.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.package_show"
+        },
+        "operationId": "package_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` or `name` of the dataset",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "use_default_schema",
+            "in": "query",
+            "description": "use default package schema instead of a custom schema defined with an <b>IDatasetForm</b> plugin (default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_tracking",
+            "in": "query",
+            "description": "add tracking information to dataset and resources (default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_plugin_data",
+            "in": "query",
+            "description": "include the internal plugin data object (sysadmin only, optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=package_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=package_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/Package"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/resource_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get a resource data",
+        "description": "<p><b>ckan.logic.action.get.resource_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return the metadata of a resource.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.resource_show"
+        },
+        "operationId": "resource_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` of the resource",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "include_tracking",
+            "in": "query",
+            "description": "add tracking information to dataset and resources (default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=resource_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=resource_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/Resource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/group_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get a group data",
+        "description": "<p><b>ckan.logic.action.get.group_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return the details of a group.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.group_show"
+        },
+        "operationId": "group_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` or `name` of the group",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "include_datasets",
+            "in": "query",
+            "description": "include a truncated list of the group’s datasets (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_dataset_count",
+            "in": "query",
+            "description": "include the full `package_count` (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_extras",
+            "in": "query",
+            "description": "include the group’s extra fields (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_users",
+            "in": "query",
+            "description": "include the group’s users (optional, default: <i>`True`</i> if <i>`ckan.auth.public_user_details`</i> is <i>`True`</i> otherwise <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_groups",
+            "in": "query",
+            "description": "include the group’s sub groups (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_tags",
+            "in": "query",
+            "description": "include the group’s tags (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_followers",
+            "in": "query",
+            "description": "include the group’s number of followers (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=group_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=group_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/Group"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/organization_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get an organization data",
+        "description": "<p><b>ckan.logic.action.get.organization_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return the details of an organization.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.organization_show"
+        },
+        "operationId": "organization_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` or `name` of the organization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "include_datasets",
+            "in": "query",
+            "description": "include a truncated list of the organization’s datasets (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_dataset_count",
+            "in": "query",
+            "description": "include the full `package_count` (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_extras",
+            "in": "query",
+            "description": "include the organization’s extra fields (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_users",
+            "in": "query",
+            "description": "include the organization’s users (optional, default: <i>`True`</i> if <i>`ckan.auth.public_user_details`</i> is <i>`True`</i> otherwise <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_groups",
+            "in": "query",
+            "description": "include the organization’s sub organizations (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_tags",
+            "in": "query",
+            "description": "include the organization’s tags (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "include_followers",
+            "in": "query",
+            "description": "include the organization’s number of followers (optional, default: <i>`True`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/Organization"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/tag_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get a tag data",
+        "description": "<p><b>ckan.logic.action.get.tag_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return the details of a tag and all its datasets.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.tag_show"
+        },
+        "operationId": "tag_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `name` or `id` of the tag",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "vocabulary_id",
+            "in": "query",
+            "description": "the `id` or `name` of the tag vocabulary that the tag is in - if it is not specified it will assume it is a free tag. (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "include_datasets",
+            "in": "query",
+            "description": "include a list of the tag’s datasets. (Up to a limit of <b>1000</b> - for more flexibility, use <i>`package_search`</i> - see <i>`package_search()`</i> for an example.) (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/Tag"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/user_show": {
+      "get": {
+        "tags": [
+          "SHOW"
+        ],
+        "summary": "Get a user SHOW",
+        "description": "<p><b>ckan.logic.action.get.user_show</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p>Return a user account.<br><b>Return type:</b> dictionary.<br>The details of the user. Includes email_hash and number_created_packages (which excludes draft or private datasets unless it is the same user or sysadmin making the request). Excludes the password (hash) and reset_key. If it is the same user or a sysadmin requesting, the email and apikey are included.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.user_show"
+        },
+        "operationId": "user_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "the `id` or `name` of the user (optional)<br>Either the <b>`id`</b> should be passed or the user should be logged in.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "include_datasets",
+            "in": "query",
+            "description": "include a list of datasets the user has created. If it is the same user or a sysadmin requesting, it includes datasets that are draft or private. (optional, default: <i>`False`</i>, limit: <b>50</b>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_num_followers",
+            "in": "query",
+            "description": "include the number of followers the user has (optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_password_hash",
+            "in": "query",
+            "description": "include the stored password hash (sysadmin only, optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_plugin_extras",
+            "in": "query",
+            "description": "include the internal plugin extras object (sysadmin only, optional, default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=organization_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "$ref": "#/definitions/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/package_search": {
+      "get": {
+        "tags": [
+          "SEARCH"
+        ],
+        "summary": "Get datasets that match the search criteria",
+        "description": "<p><b>ckan.logic.action.get.package_search</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p><br>Searches for packages satisfying a given search criteria.<br>This action accepts solr search query parameters (details below), and returns a dictionary of results, including dictized datasets that match the search criteria, a search count and also facet information.<br><b>Solr Parameters:</b><br>For more in depth treatment of each parameter, please read the <a href='https://solr.apache.org/guide/8_8/common-query-parameters.html'>Solr Documentation</a>.<br>his action accepts a subset of solr’s search query parameters.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.package_search"
+        },
+        "operationId": "package_search",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "the solr query. Optional. Default: <b>`':'`</b>",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fq",
+            "in": "query",
+            "description": "any filter queries to apply. Note: <i>`+site_id:{ckan_site_id}`</i> is added to this string prior to the query being executed.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fq_list",
+            "in": "query",
+            "description": "additional filter queries to apply.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "sorting of the search results. Optional. Default: `score desc`, `metadata_modified desc`. As per the solr documentation, this is a comma-separated string of field names and sort-orderings.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "description": "the maximum number of matching rows (datasets) to return. (optional, default: <b>10</b>, upper limit: <b>1000</b> unless set in site’s configuration <i>`ckan.search.rows_max`</i>)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "the offset in the complete result for where the set of returned datasets should begin.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "facet",
+            "in": "query",
+            "description": "whether to enable faceted results. Default: <i>`True`</i>.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          },
+          {
+            "name": "facet.mincount",
+            "in": "query",
+            "description": "the minimum counts for facet fields should be included in the results.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "facet.limit",
+            "in": "query",
+            "description": "the maximum number of values the facet fields return. A negative value means unlimited. This can be set instance-wide with the <i>`search.facets.limit`</i> config option. Default is <b>50</b>.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "facet.field",
+            "in": "query",
+            "description": "the fields to facet upon. Default `empty`. If `empty`, then the returned facet information is `empty`.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "include_drafts",
+            "in": "query",
+            "description": "if <i>`True`</i>, draft datasets will be included in the results. A user will only be returned their own draft datasets, and a sysadmin will be returned all draft datasets. Optional, the default is <i>`False`</i>.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "description": "if <i>`True`</i>, deleted datasets will be included in the results (site configuration <i>`ckan.search.remove_deleted_packages`</i> must be set to <i>`False`</i>). Optional, the default is <i>`False`</i>.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "include_private",
+            "in": "query",
+            "description": "if <i>`True`</i>, private datasets will be included in the results. Only private datasets from the user’s organizations will be returned and sysadmins will be returned all private datasets. Optional, the default is <i>`False`</i>.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          },
+          {
+            "name": "use_default_schema",
+            "in": "query",
+            "description": "use default package schema instead of a custom schema defined with an <b>IDatasetForm</b> plugin (default: <i>`False`</i>)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=package_search",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=package_search"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "facets": {
+                          "type": "object"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/Package"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/resource_search": {
+      "get": {
+        "tags": [
+          "SEARCH"
+        ],
+        "summary": "Get resources that match the search criteria",
+        "description": "<p><b>ckan.logic.action.get.resource_search</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p><br>Searches for resources in public Datasets satisfying the search criteria.<br><b>Return type:</b> dictionary with a count field, and a results field.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.resource_search"
+        },
+        "operationId": "resource_search",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "the search criteria (string or list of strings of the form <i>`{field}:{term1}`</i>).",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "a field on the Resource model that orders the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "apply an offset to the query.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "apply a limit to the query.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=resource_search",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=resource_search"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/Resource"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/tag_search": {
+      "get": {
+        "tags": [
+          "SEARCH"
+        ],
+        "summary": "Get tags that match the search criteria",
+        "description": "<p><b>ckan.logic.action.get.tag_search</b><i>(context: Context, data_dict: dict[str, Any])→ dict[str, Any]</i></p><br>Return a list of tags whose names contain a given string.<br>By default only free tags (tags that don’t belong to any vocabulary) are searched. If the <i>vocabulary_id</i> argument is given then only tags belonging to that vocabulary will be searched instead.<br><b>Return type:</b> dictionary.",
+        "externalDocs": {
+          "url": "https://docs.ckan.org/en/2.10/api/index.html#ckan.logic.action.get.tag_search"
+        },
+        "operationId": "tag_search",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "the string(s) to search for.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "vocabulary_id",
+            "in": "query",
+            "description": "the `id` or `name` of the tag vocabulary to search in (optional).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "when limit is given, the offset to start returning tags from.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "the maximum number of tags to return.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_search",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=tag_search"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/Tag"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/help_show": {
+      "get": {
+        "tags": [
+          "HELP"
+        ],
+        "summary": "Get an API action help",
+        "description": "Return the help string for a particular API action.<br><b>Return type:</b> string.<br><b>Raises: ckan.logic.NotFound</b> if the action function doesn’t exist.<br>The help string for the action function, or None if the function does not have a docstring.",
+        "operationId": "help_show",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "action function name (eg <i>`user_create`</i>, <i>`package_search`</i>)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "help": {
+                      "title": "full url for action`s help",
+                      "description": "http://127.0.0.1:5000/api/3/action/help_show?name=help_show",
+                      "type": "string",
+                      "example": "http://127.0.0.1:5000/api/3/action/help_show?name=help_show"
+                    },
+                    "success": {
+                      "title": "boolean",
+                      "description": "true or false",
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    },
+    "ckan_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "http://localhost:5000/user/login",
+      "flow": "implicit",
+      "scopes": {
+        "read:datasets": "read your datasets",
+        "write:datasets": "modify datasets in your account"
+      }
+    }
+  },
+
+  "definitions": {
+    "Package": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "example": "John Snow"
+        },
+        "author_email": {
+          "type": "string",
+          "example": "jsnow@example.com"
+        },
+        "creator_user_id": {
+          "type": "string",
+          "example": "fbddfb52-f30a-4ae7-98ed-e0cc58a02f26"
+        },
+        "id": {
+          "type": "string",
+          "excample": "4f81087f-6bd9-4d6d-9ba5-9c7ea11342c8"
+        },
+        "isopen": {
+          "type": "boolean",
+          "example": false
+        },
+        "license_id": {
+          "type": "string"
+        },
+        "license_title": {
+          "type": "string"
+        },
+        "maintainer": {
+          "type": "string",
+          "example": "John Snow"
+        },
+        "maintainer_email": {
+          "type": "string",
+          "example": "jsnow@gmail.com"
+        },
+        "metadata_created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata_modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string",
+          "example": "Test dataset"
+        },
+        "notes": {
+          "type": "string",
+          "example": "Description to Test dataset"
+        },
+        "num_resources": {
+          "type": "integer",
+          "example": 1
+        },
+        "num_tags": {
+          "type": "integer",
+          "example": 5
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "owner_org": {
+          "type": "string",
+          "example": "3d6c7714-b222-4011-9153-57d876d8e7c7"
+        },
+        "private": {
+          "type": "boolean",
+          "example": false
+        },
+        "state": {
+          "type": "string",
+          "example": "active"
+        },
+        "title": {
+          "type": "string",
+          "example": "Test dataset"
+        },
+        "type": {
+          "type": "string",
+          "example": "dataset"
+        },
+        "url": {
+          "type": "string",
+          "example": "https:/example.com"
+        },
+        "version": {
+          "type": "string",
+          "example": ""
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Group"
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Resource"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        },
+        "extras": {
+          "type": "array"
+        },
+        "relationships_as_subject": {
+          "type": "array"
+        },
+        "relationships_as_object": {
+          "type": "array"
+        }
+      },
+      "xml": {
+        "name": "Package"
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "3d6c7714-b222-4011-9153-57d876d8e7c7"
+        },
+        "name": {
+          "type": "string",
+          "example": "test-organization"
+        },
+        "title": {
+          "type": "string",
+          "example": "Test organization"
+        },
+        "type": {
+          "type": "string",
+          "example": "organization"
+        },
+        "description": {
+          "type": "string",
+          "example": "Description to Test organization"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "is_organization": {
+          "type": "boolean",
+          "example": true
+        },
+        "approval_status": {
+          "type": "string",
+          "example": "approved"
+        },
+        "state": {
+          "type": "string",
+          "example": "active"
+        }
+      }
+    },
+    "Group": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Description to Test group"
+        },
+        "display_name": {
+          "type": "string",
+          "example": "Test group"
+        },
+        "id": {
+          "type": "string",
+          "example": "5da80529-29c3-4034-bb94-74bc49aca743"
+        },
+        "image_display_url": {
+          "type": "string",
+          "example": ""
+        },
+        "name": {
+          "type": "string",
+          "example": "test-group"
+        },
+        "title": {
+          "type": "string",
+          "example": "Test group"
+        }
+      }
+    },
+    "Resource": {
+      "type": "object",
+      "properties": {
+        "cache_last_updated": {
+          "type": ["string", "null"],
+          "example": null
+        },
+        "cache_url": {
+          "type": ["string", "null"],
+          "example": null
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "example": "Description to Test resource"
+        },
+        "format": {
+          "type": "string",
+          "example": "CSV"
+        },
+        "hash": {
+          "type": "string",
+          "example": ""
+        },
+        "id": {
+          "type": "string",
+          "example": "d1d478af-0515-4354-883b-8de36ce318e3"
+        },
+        "last_modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata_modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mimetype": {
+          "type": "string",
+          "example": "application/pdf"
+        },
+        "mimetype_inner": {
+          "type": ["string", "null"],
+          "example": null
+        },
+        "name": {
+          "type": "string",
+          "example": "Test resource"
+        },
+        "package_id": {
+          "type": "string",
+          "example": "4f81087f-6bd9-4d6d-9ba5-9c7ea11342c8"
+        },
+        "position": {
+          "type": "integer",
+          "example": 0
+        },
+        "resource_type": {
+          "type": ["string", "null"],
+          "example": null
+        },
+        "size": {
+          "type": "integer",
+          "example": 171222
+        },
+        "state": {
+          "type": "string",
+          "example": "active"
+        },
+        "url": {
+          "type": "string",
+          "example": "http://127.0.0.1:5000/dataset/4f81087f-6bd9-4d6d-9ba5-9c7ea11342c8/resource/d1d478af-0515-4354-883b-8de36ce318e3/download/uc-856cc8b4-1a74-48d7-9c96-4ec1e32a34c3.pdf"
+        },
+        "url_type": {
+          "type": "string",
+          "example": "upload"
+        }
+      }
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "example": "Tag name"
+        },
+        "id": {
+          "type": "string",
+          "example": "4014e3b2-c0b5-4acb-a544-c5bc45915c7a"
+        },
+        "name": {
+          "type": "string",
+          "example": "tag-name"
+        },
+        "state": {
+          "type": "string",
+          "example": "active"
+        },
+        "vocabulary_id": {
+          "type": ["string", "null"],
+          "example": null
+        }
+      }
+    },
+    "License": {
+      "type": "object",
+      "properties": {
+        "domain_content": {
+          "type": "string",
+          "example": "True"
+        },
+        "id": {
+          "type": "string",
+          "example": "other-open"
+        },
+        "domain_data": {
+          "type": "string",
+          "example": "False"
+        },
+        "domain_software": {
+          "type": "string",
+          "example": "False"
+        },
+        "family": {
+          "type": "string",
+          "example": ""
+        },
+        "is_generic": {
+          "type": "string",
+          "example": "True"
+        },
+        "od_conformance": {
+          "type": "string",
+          "example": "approved"
+        },
+        "osd_conformance": {
+          "type": "string",
+          "example": "not reviewed"
+        },
+        "maintainer": {
+          "type": "string",
+          "example": ""
+        },
+        "status": {
+          "type": "string",
+          "example": "active"
+        },
+        "url": {
+          "type": "string",
+          "example": ""
+        },
+        "title": {
+          "type": "string",
+          "example": "Other (Open)"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "fbddfb52-f30a-4ae7-98ed-e0cc58a02f26"
+        },
+        "name": {
+          "type": "string",
+          "example": "jsnow"
+        },
+        "fullname": {
+          "type": "string",
+          "example": "John Snow"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "about": {
+          "type": "string",
+          "example": "About John Snow"
+        },
+        "last_active": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "activity_streams_email_notifications": {
+          "type": "boolean",
+          "example": false
+        },
+        "sysadmin": {
+          "type": "boolean",
+          "example": true
+        },
+        "state": {
+          "type": "string",
+          "example": "active"
+        },
+        "image_url": {
+          "type": "string",
+          "example": ""
+        },
+        "display_name": {
+          "type": "string",
+          "example": "jsnow"
+        },
+        "email_hash": {
+          "type": "string",
+          "example": "8004498bb66f0a5f1cc6d7fb84885826"
+        },
+        "number_created_packages": {
+          "type": "integer",
+          "example": 1
+        },
+        "image_display_url": {
+          "type": "string",
+          "example": ""
+        }
+      }
+    }
+  }
+}

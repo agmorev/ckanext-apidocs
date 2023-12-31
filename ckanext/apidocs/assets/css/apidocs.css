@@ -1,0 +1,28 @@
+.row {
+  --bs-gutter-x: 0;
+  margin-bottom: 20px;
+}
+.row .wrapper {
+  min-height: auto;
+}
+
+
+#swagger-ui ::before {
+  display: none;
+}
+#swagger-ui .information-container {
+  background: #eee url(../../../base/images/bg.png);
+}
+#swagger-ui .information-container .info {
+  margin: 20px 0;
+}
+#swagger-ui .scheme-container {
+  display: none;
+}
+#swagger-ui .topbar {
+  background-color: #000;
+}
+#swagger-ui .topbar .wrapper{
+  background: #000;
+  border: none;
+}
