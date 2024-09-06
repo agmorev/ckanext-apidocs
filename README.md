@@ -33,7 +33,7 @@ To install ckanext-apidocs:
 
      . /usr/lib/ckan/default/bin/activate
 
-2. Clone the source and install it on the virtualenv
+2. Clone the source and install it on the virtualenv:
 
     git clone https://github.com/agmorev/ckanext-apidocs.git
     cd ckanext-apidocs

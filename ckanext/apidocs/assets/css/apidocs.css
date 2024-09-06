@@ -5,6 +5,9 @@
 .row .wrapper {
   min-height: auto;
 }
+.apidocs {
+  padding: 0 !important;
+}
 
 
 #swagger-ui ::before {

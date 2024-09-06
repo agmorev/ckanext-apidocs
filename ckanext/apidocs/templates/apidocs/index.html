@@ -4,15 +4,15 @@
 {% endblock secondary %}
 
 {% block primary %}
-  <div class="primary col-md-12 col-xs-12" role="main">
+    <div class="primary col-md-12 col-xs-12 apidocs" role="main">
 
-  {% block primary_content %}
+    {% block primary_content %}
 
-    {% asset "apidocs/apidocs-js" %}
-    {% asset "apidocs/apidocs-css" %}
+        {% asset "apidocs/apidocs-js" %}
+        {% asset "apidocs/apidocs-css" %}
 
-    <div id="swagger-ui"></div>
+        <div id="swagger-ui"></div>
 
-  {% endblock primary_content %}
+    {% endblock primary_content %}
 
 {% endblock primary%}
