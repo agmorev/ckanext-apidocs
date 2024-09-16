@@ -2,7 +2,7 @@ var host = window.location.origin;
 
 window.onload = function() {
   window.ui = SwaggerUIBundle({
-    url: host + "/swagger.json",
+    url: host + "/ckanapi.json",
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [

@@ -27,6 +27,7 @@
   display: none;
 }
 #swagger-ui .topbar {
+  display: none;
   background-color: #000;
 }
 #swagger-ui .topbar .wrapper{

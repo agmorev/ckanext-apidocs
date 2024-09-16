@@ -23,7 +23,6 @@ fields = {
 
 
 def index() -> Response:
-    fields["config_json"] = json.dumps(config)
     return render_template("apidocs/index.html", **fields)
 
 apidocs.add_url_rule("/", view_func=index)
