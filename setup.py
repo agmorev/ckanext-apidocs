@@ -13,6 +13,9 @@ setup(
             ('**/templates/**.html', 'ckan', None),
         ],
     },
+    install_requires=[
+        'PyYAML',
+    ],
     entry_points='''
         [ckan.plugins]
         apidocs=ckanext.apidocs.plugin:ApidocsPlugin

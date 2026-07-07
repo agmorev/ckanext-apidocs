@@ -59,6 +59,23 @@ To install ckanext-apidocs:
 
 The content of the API actions can be changed or added by making changes to the file `swagger.json` placed in `/public` folder. The file must be created and changed in the same folder `/public` of your project or extension.
 
+## Using a CKAN API key with the docs UI
+
+This extension exposes an **ApiKey** security scheme that lets you paste your CKAN API key into the Swagger UI "Authorize" dialog so the UI will send it in the `Authorization` header for API requests.
+
+How to obtain your API key:
+
+- Sign in to your CKAN site and open your user profile page.
+- Look for the "API key" or "Reset your API key" control (depends on your CKAN theme/version) and copy the key.
+
+How to use it in the UI:
+
+1. Open the `/api/docs/` page in your browser.
+2. Click the **Authorize** button (top-right of Swagger UI) and paste your API key into the prompt.
+3. After authorizing, subsequent requests from the UI will include the API key in the `Authorization` header.
+
+Security note: never share your API key, and prefer using short-lived tokens or fine-grained access control where available.
+
 
 ## Developer installation
 

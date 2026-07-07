@@ -24,7 +24,18 @@
   background: #eee url(../../../base/images/bg.png);
 }
 #swagger-ui .scheme-container {
-  display: none;
+  margin: 0;
+}
+#swagger-ui .scheme-container .schemes {
+  border: none;
+  justify-content: space-between;
+  box-shadow: none;
+}
+#swagger-ui .scheme-container .schemes .schemes-server-container label::after {
+  content: none;
+}
+#swagger-ui .scheme-container .wrapper::after {
+  content: none;
 }
 #swagger-ui .topbar {
   display: none;
@@ -42,4 +53,26 @@
 }
 .swagger-ui .topbar .download-url-wrapper input[type=text] {
   height: auto;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+}
+.badge-core {
+  background-color: #007bff; /* Blue */
+}
+.badge-chained {
+  background-color: #28a745; /* Green */
+}
+.badge-side-effect-free {
+  background-color: #fd7e14; /* Orange */
+}
+.badge-extension {
+  background-color: #6f42c1; /* Purple */
 }
