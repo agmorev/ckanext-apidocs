@@ -1,0 +1,197 @@
+# Config declaration of ckanext-apidocs.
+#
+# The file is loaded through the `config_declarations` blanket of the plugin,
+# see https://docs.ckan.org/en/2.12/maintaining/configuration.html#config-declaration
+#
+# An example configuration for this extension can be printed with:
+#
+#   ckan config declaration apidocs
+#
+# The runtime accessors in `ckanext/apidocs/config.py` fall back to the same
+# defaults when an option is missing from the configuration file, so keep both
+# in sync when changing a default value.
+version: 1
+
+groups:
+  - annotation: APIDocs settings
+    options:
+      - key: ckanext.apidocs.base_path
+        default: /api/3/action
+        example: /api/3/action
+        description: |
+          Server URL prefix of the documented action endpoints. It is used as
+          the `servers` entry of the generated OpenAPI document, so requests
+          sent from the documentation page go to `<base_path>/<action_name>`.
+          Change it only if your site exposes the Action API under a different
+          prefix.
+
+      - key: ckanext.apidocs.openapi_version
+        default: 3.0.0
+        example: 3.1.0
+        description: |
+          Version of the OpenAPI specification advertised by the generated
+          document. Supported values are `3.0.0` and `3.1.0`; any other value
+          falls back to `3.0.0`.
+
+      - key: ckanext.apidocs.enable_api_methods
+        type: list
+        default:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        example: GET POST
+        description: |
+          HTTP methods documented by the extension, as a space separated list.
+          Actions whose HTTP method is not listed here are omitted from the
+          generated document.
+
+      - key: ckanext.apidocs.title
+        default: CKAN API
+        example: Data Portal API
+        editable: true
+        description: |
+          Title of the documentation. It is rendered at the top of the
+          documentation page and stored in `info.title` of the OpenAPI
+          document.
+
+      - key: ckanext.apidocs.description
+        commented: true
+        placeholder_callable: ckanext.apidocs.config:apidocs_description
+        description: |
+          Long description of the API. It is rendered under the title and
+          stored in `info.description` of the OpenAPI document. Markdown is
+          supported. When the option is empty, a built-in description is used.
+
+      - key: ckanext.apidocs.spec_version
+        default_callable: ckanext.apidocs.config:apidocs_spec_version
+        editable: true
+        description: |
+          Version of the documented API, stored in `info.version`. By default
+          the version of the CKAN instance is advertised.
+
+      - key: ckanext.apidocs.token_header
+        default: Authorization
+        example: X-CKAN-API-Key
+        editable: true
+        description: |
+          Name of the header used by the "Authorize" dialog of the Swagger UI
+          to send the API token. When the option is empty, the
+          `apitoken_header_name` setting is used, falling back to
+          `Authorization`.
+
+      - key: ckanext.apidocs.cache_ttl
+        type: int
+        default: 300
+        validators: natural_number_validator
+        example: 0
+        description: |
+          Number of seconds the generated OpenAPI document is kept in memory
+          before it is built again. Set it to `0` to build the document on
+          every request. The HTTP caching of the endpoints is configured with
+          the core `ckan.cache_enabled` and `ckan.cache_expires` settings.
+
+      - key: ckanext.apidocs.require_login
+        type: bool
+        default: false
+        example: "true"
+        editable: true
+        description: |
+          Require an authenticated user to access the documentation page and
+          the generated documents. When disabled (the default), the
+          documentation is publicly available.
+
+      - key: ckanext.apidocs.sysadmin_only
+        type: bool
+        default: false
+        example: "true"
+        editable: true
+        description: |
+          Limit the documentation to sysadmins. Visitors that are not signed
+          in are redirected to the login page and every other user gets a
+          `403` response, even when `ckanext.apidocs.require_login` is
+          disabled, because signing in becomes mandatory as soon as the
+          option is set. It takes precedence over
+          `ckanext.apidocs.allowed_users`.
+
+      - key: ckanext.apidocs.allowed_users
+        type: list
+        example: editor api_bot
+        editable: true
+        description: |
+          Restrict the documentation to the listed users, as a space separated
+          list of usernames. Anyone else gets a `403` response (visitors that
+          are not signed in are redirected to the login page), even when
+          `ckanext.apidocs.require_login` is disabled, because signing in
+          becomes mandatory as soon as the option is set. Usernames are
+          matched case-insensitively. When empty (the default), no per-user
+          restriction is applied and access is controlled solely by
+          `ckanext.apidocs.require_login`.
+
+      - key: ckanext.apidocs.include_extensions
+        type: list
+        example: scheming_datasets
+        description: |
+          Document only the actions of the listed extensions, as a space
+          separated list. When empty (the default), the actions of all enabled
+          extensions are documented.
+
+      - key: ckanext.apidocs.exclude_extensions
+        type: list
+        example: datastore datapusher
+        description: |
+          Never document the actions of the listed extensions, as a space
+          separated list. This option takes precedence over
+          `ckanext.apidocs.include_extensions`.
+
+  - annotation: APIDocs UI settings
+    options:
+      - key: ckanext.apidocs.ui.validator_url
+        placeholder: https://validator.swagger.io/validator
+        commented: true
+        editable: true
+        description: |
+          Address of the Swagger UI validator used to check the generated
+          document, for example `https://validator.swagger.io/validator`.
+          Leave it empty (the default) to disable the external validator, which
+          also prevents the address of your documentation from being sent to a
+          third party.
+
+      - key: ckanext.apidocs.ui.persist_authorization
+        type: bool
+        default: true
+        editable: true
+        description: |
+          Keep the API token in the browser, so it does not have to be entered
+          again after reloading the page.
+
+      - key: ckanext.apidocs.ui.doc_expansion
+        default: list
+        example: full
+        editable: true
+        description: |
+          Default expansion depth of the operations: `none`, `list` or `full`.
+          Any other value falls back to `list`.
+
+      - key: ckanext.apidocs.ui.filter
+        type: bool
+        default: true
+        editable: true
+        description: Show the search box in the documentation page.
+
+      - key: ckanext.apidocs.ui.try_it_out
+        type: bool
+        default: true
+        editable: true
+        description: |
+          Enable the "Try it out" feature, which sends requests to the Action
+          API directly from the documentation page.
+
+      - key: ckanext.apidocs.ui.deep_linking
+        type: bool
+        default: true
+        editable: true
+        description: |
+          Update the URL fragment when an operation is opened, so that a single
+          action can be linked to.

@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
+"""Minimal setup script.
+
+Project metadata, dependencies and entry points are declared in
+``pyproject.toml``. This file only keeps Babel's message extractors, which
+are not supported by ``pyproject.toml``.
+"""
+
 from setuptools import setup
 
+
 setup(
-    # If you are changing from the default layout of your extension, you may
-    # have to change the message extractors, you can read more about babel
-    # message extraction at
-    # http://babel.pocoo.org/docs/messages/#extraction-method-mapping-and-configuration
     message_extractors={
-        'ckanext': [
-            ('**.py', 'python', None),
-            ('**.js', 'javascript', None),
-            ('**/templates/**.html', 'ckan', None),
+        "ckanext/apidocs": [
+            ("**.py", "python", None),
+            ("assets/js/apidocs.js", "javascript", None),
+            ("templates/**.html", "ckan", None),
         ],
     },
-    install_requires=[
-        'PyYAML',
-    ],
-    entry_points='''
-        [ckan.plugins]
-        apidocs=ckanext.apidocs.plugin:ApidocsPlugin
-    ''',
 )

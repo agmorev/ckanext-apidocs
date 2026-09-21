@@ -1,32 +1,38 @@
-import ckan.plugins as plugins
-import ckan.plugins.toolkit as toolkit
+"""The ckanext-apidocs plugin."""
 
-from ckanext.apidocs import views
-from ckanext.apidocs.logic import action
+from __future__ import annotations
+
+from ckan import plugins as p
+from ckan.common import CKANConfig
+from ckan.plugins import toolkit as tk
+
+from ckanext.apidocs import helpers, views
 
 
-class ApidocsPlugin(plugins.SingletonPlugin):
-    plugins.implements(plugins.IConfigurer)
-    plugins.implements(plugins.IBlueprint)
-    plugins.implements(plugins.IClick)
-    plugins.implements(plugins.IActions)
+@tk.blanket.config_declarations
+class ApidocsPlugin(p.SingletonPlugin):
+    """Document the API of a CKAN instance with Swagger UI.
+
+    Config options are declared in ``ckanext/apidocs/config_declaration.yaml``
+    and loaded through the ``config_declarations`` blanket.
+    """
+
+    p.implements(p.IConfigurer)
+    p.implements(p.IBlueprint)
+    p.implements(p.IClick)
 
     # IConfigurer
 
-    def update_config(self, config_):
-        toolkit.add_template_directory(config_, "templates")
-        toolkit.add_public_directory(config_, "public")
-        toolkit.add_resource("assets", "apidocs")
+    def update_config(self, config_: CKANConfig):
+        tk.add_template_directory(config_, "templates")
+        tk.add_resource("assets", "apidocs")
+
+        helpers.invalidate_cache()
 
     # IBlueprint
 
     def get_blueprint(self):
         return views.get_blueprints()
-    
-    # IActions
-
-    def get_actions(self):
-        return action.get_actions()
 
     # IClick
 

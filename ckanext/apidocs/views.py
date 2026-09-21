@@ -1,47 +1,116 @@
-import json
+"""Web views of the API documentation."""
 
-from flask import Blueprint, render_template
+from __future__ import annotations
+
+from flask import Blueprint
 from flask.wrappers import Response
 
-from ckanext.apidocs import helpers
+from ckan.plugins import toolkit as tk
+
+from ckanext.apidocs import config, helpers
 
 
 apidocs = Blueprint("apidocs", __name__, url_prefix="/api/docs/")
 
-config = {
-    "app_name": "CKAN API DOCS",
-    "dom_id": "#swagger-ui",
-    "layout": "StandaloneLayout",
-    "deepLinking": True,
-}
 
-fields = {
-    # Some fields are used directly in template
-    "base_url": "/",
-    "app_name": config.pop("app_name"),
-    # Rest are just serialized into json string for inclusion in the .js file
-    "config_json": json.dumps(config),
-}
+@apidocs.before_request
+def _restrict_access():
+    """Optionally restrict the documentation to authenticated users.
+
+    ``ckanext.apidocs.require_login`` accepts any signed in user while
+    ``ckanext.apidocs.sysadmin_only`` and ``ckanext.apidocs.allowed_users``
+    narrow the access down to sysadmins or to the listed usernames. Both of
+    them require authentication on their own.
+    """
+    if not config.apidocs_access_restricted():
+        return None
+
+    if not tk.current_user.is_authenticated:
+        if tk.request.endpoint == "apidocs.index":
+            return tk.redirect_to("user.login")
+
+        return tk.abort(
+            403, "Authentication is required to access the API documentation"
+        )
+
+    if not config.apidocs_allows_user(
+        tk.current_user.name, bool(tk.current_user.sysadmin)
+    ):
+        return tk.abort(
+            403, "You are not allowed to access the API documentation"
+        )
+
+    return None
 
 
-def index() -> str | Response:
-    return render_template("apidocs/index.html", **fields)
+def index() -> str:
+    """Render the Swagger UI page."""
+    spec = helpers.get_openapi_spec()
+
+    return tk.render(
+        "apidocs/index.html",
+        extra_vars={
+            "title": config.apidocs_title(),
+            "apidocs_config": {
+                "specUrl": tk.url_for("apidocs.ckanapi_json"),
+                "ui": config.apidocs_ui_config(),
+                "badges": helpers.collect_badges(spec),
+            },
+        },
+    )
 
 
 def ckanapi_json() -> Response:
-    spec = helpers.build_openapi_spec()
-    return Response(json.dumps(spec, indent=2), mimetype="application/json")
+    """The generated OpenAPI document, serialized as JSON."""
+    return _spec_response(
+        helpers.dumps_openapi_json(helpers.get_openapi_spec()),
+        "application/json",
+    )
 
 
 def ckanapi_yaml() -> Response:
-    spec = helpers.build_openapi_spec()
-    yaml_str = helpers.dump_openapi_yaml(spec)
-    return Response(yaml_str, mimetype="application/x-yaml")
+    """The generated OpenAPI document, serialized as YAML."""
+    return _spec_response(
+        helpers.dump_openapi_yaml(helpers.get_openapi_spec()),
+        "application/x-yaml",
+    )
 
 
-apidocs.add_url_rule("/", view_func=index)
-apidocs.add_url_rule("/ckanapi.yaml", view_func=ckanapi_yaml)
-apidocs.add_url_rule("/ckanapi.json", view_func=ckanapi_json)
+def _spec_response(payload: str, mimetype: str) -> Response:
+    """Return the serialized specification with an ``ETag``.
+
+    The ``Cache-Control`` header of the response is owned by CKAN's cache
+    middleware and is configured with the ``ckan.cache_enabled`` and
+    ``ckan.cache_expires`` settings.
+    """
+    etag = helpers.spec_etag(payload)
+
+    if etag in tk.request.if_none_match:
+        response = Response(status=304)
+    else:
+        response = Response(payload, mimetype=mimetype)
+
+    response.headers["ETag"] = f'"{etag}"'
+
+    return response
+
+
+apidocs.add_url_rule("/", endpoint="index", view_func=index)
+
+apidocs.add_url_rule(
+    "/ckanapi.json", endpoint="ckanapi_json", view_func=ckanapi_json
+)
+apidocs.add_url_rule(
+    "/ckanapi.yaml", endpoint="ckanapi_yaml", view_func=ckanapi_yaml
+)
+
+# Aliases following the OpenAPI naming convention
+apidocs.add_url_rule(
+    "/openapi.json", endpoint="openapi_json", view_func=ckanapi_json
+)
+apidocs.add_url_rule(
+    "/openapi.yaml", endpoint="openapi_yaml", view_func=ckanapi_yaml
+)
 
 
 def get_blueprints():

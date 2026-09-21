@@ -1,5 +1,7 @@
-include README.rst
+include README.md
+include CHANGELOG.md
 include LICENSE
 include requirements.txt
-recursive-include ckanext/apidocs *.html *.json *.js *.less *.css *.mo *.yml
-recursive-include ckanext/apidocs/migration *.ini *.py *.mako
+include pyproject.toml
+recursive-include ckanext/apidocs *.html *.js *.css *.yml *.yaml *.png *.md
+recursive-include ckanext/apidocs/i18n *.pot *.po *.mo

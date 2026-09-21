@@ -1,19 +1,8 @@
-"""Tests for auth.py."""
+"""Deprecated example tests, superseded by ``tests/test_plugin.py``."""
 
 import pytest
 
-import ckan.tests.factories as factories
-import ckan.tests.helpers as test_helpers
-import ckan.model as model
-
-
-@pytest.mark.ckan_config("ckan.plugins", "example")
-@pytest.mark.usefixtures("with_plugins", "clean_db")
-def test_example_get_sum():
-    user = factories.User()
-    context = {
-        "user": user["name"],
-        "model": model
-    }
-    assert test_helpers.call_auth(
-        "example_get_sum", context=context)
+pytest.skip(
+    "The example scaffolding was removed; see tests/test_plugin.py",
+    allow_module_level=True,
+)

@@ -1,0 +1,74 @@
+[project]
+name = "ckanext-apidocs"
+version = "0.1.0"
+description = "Document CKAN's Action API with OpenAPI and Swagger UI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "AGPL"}
+authors = [
+    {name = "Oleksii Morev", email = "agmorev@gmail.com"}
+]
+keywords = ["CKAN", "api", "swagger", "openapi", "documentation"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "PyYAML",
+]
+
+[project.urls]
+Homepage = "https://github.com/agmorev/ckanext-apidocs"
+Changelog = "https://github.com/agmorev/ckanext-apidocs/blob/master/CHANGELOG.md"
+
+[project.entry-points."ckan.plugins"]
+apidocs = "ckanext.apidocs.plugin:ApidocsPlugin"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-ckan",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "types-PyYAML",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::sqlalchemy.exc.SADeprecationWarning",
+    "ignore::sqlalchemy.exc.SAWarning",
+    "ignore::DeprecationWarning",
+]
+addopts = "--ckan-ini test.ini"
+
+[tool.ruff]
+line-length = 120
+extend-exclude = [
+    "ckanext/apidocs/assets/js",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C901", "PLW0602"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["ckanext/apidocs"]
+exclude = ["ckanext/apidocs/tests"]
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = false
+warn_redundant_casts = true
+warn_unused_configs = true
+
+# PyYAML ships without type information
+[[tool.mypy.overrides]]
+module = ["yaml"]
+ignore_missing_imports = true

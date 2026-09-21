@@ -1,1 +1,6 @@
+pytest
 pytest-ckan
+pytest-cov
+ruff
+mypy
+types-PyYAML

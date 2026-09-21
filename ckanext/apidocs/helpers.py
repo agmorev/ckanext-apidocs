@@ -1,112 +1,256 @@
-from typing import Any, Dict
+"""Building, caching and serializing the OpenAPI document."""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import logging
+import time
+from collections.abc import Sequence
+from typing import Any
+
+from ckan import plugins as p
+
+from ckanext.apidocs import config, interfaces, utils
+from ckanext.apidocs.schemas import schema
 
 try:
     import yaml
-except Exception:
-    yaml = None
-
-import ckan
-
-from ckanext.apidocs import config, utils
-from ckanext.apidocs.schemas import schema
+except ImportError:  # pragma: no cover - optional dependency
+    yaml = None  # type: ignore[assignment]
 
 
-CKAN_VERSION = ckan.__version__.rsplit('.', 1)[0]
+log = logging.getLogger(__name__)
+
+CKAN_VERSION = config.CKAN_VERSION
+
+_cache: tuple[str, float, dict[str, Any]] | None = None
 
 
-def build_openapi_spec() -> Dict[str, Any]:
-    """Build an OpenAPI spec (as a Python dict) describing CKAN actions.
+def build_openapi_spec(
+    *,
+    base_path: str | None = None,
+    version: str | None = None,
+    title: str | None = None,
+    description: str | None = None,
+    methods: Sequence[str] | None = None,
+    token_header: str | None = None,
+    include_extensions: Sequence[str] | None = None,
+    exclude_extensions: Sequence[str] | None = None,
+) -> dict[str, Any]:
+    """Build an OpenAPI specification describing the available actions.
 
-    This is intentionally conservative: it parses docstrings to create
-    parameter lists and simple schemas for request bodies.
+    Every argument defaults to the corresponding configuration setting, read
+    at call time, so the caller can override individual values (the CLI does
+    exactly that). The returned document is always a fresh object.
     """
-    actions = utils.collect_actions()
+    allowed_methods = list(
+        methods or config.apidocs_allowed_api_methods()
+    )
 
-    spec = schema.spec.copy()
+    if include_extensions is None:
+        include_extensions = config.apidocs_included_extensions()
+    if exclude_extensions is None:
+        exclude_extensions = config.apidocs_excluded_extensions()
 
-    for action_name, func in actions.items():
-        # Skip private / internal actions
+    spec = schema.build_spec(
+        base_path=base_path,
+        openapi_version=config.apidocs_openapi_version(),
+        title=title,
+        description=description,
+        version=version,
+        methods=allowed_methods,
+        token_header=token_header,
+    )
+
+    actions = utils.collect_actions(
+        include_extensions=include_extensions,
+        exclude_extensions=exclude_extensions,
+    )
+
+    for action_name, info in actions.items():
         if action_name.startswith("_"):
             continue
-        
-        module = func.__module__.split(".")[-1]
-        method = utils.convert_module_to_method(module)
-        if method is None:
-            method = "GET" if getattr(func, "side_effect_free", False) else "POST"
-        if method not in config.apidocs_allowed_api_methods():
+
+        if info.method not in allowed_methods:
             continue
 
-        badges = []
-        if origin := getattr(func, "__origin__", None):
-            badges.append(origin)
-        if getattr(func, "chained_action", False):
-            badges.append("chained")
+        parsed = utils.parse_docstring(info.func.__doc__)
+        operation = _build_operation(action_name, info, parsed)
 
-        summary, description, params = utils.parse_docstring(func.__doc__)
+        paths = spec["paths"].setdefault(f"/{action_name}", {})
+        paths[info.method.lower()] = operation
 
-        # Build path and operation
-        path = f"/{action_name}"
-        operation = schema.operation.copy()
-        operation["tags"] = [method]
-        operation["summary"] = summary or action_name
-        operation["x-badges"] = badges
-        operation["description"] = description
+    return _apply_spec_extensions(spec)
 
-        if origin == "core":
-            operation["externalDocs"] = {
-                "url": f"https://docs.ckan.org/en/{CKAN_VERSION}/api/index.html#ckan.logic.action.{module}.{action_name}"
-            }
 
-        # Build parameters or requestBody
-        if method == "GET":
-            # map params to query parameters
-            parameters = []
-            for param_name, param_info in params.items():
-                param_schema: Dict[str, Any] = {"type": "string"}
-                param_type = param_info.get("type", "")
-                if "int" in param_type or "int" in param_type.lower():
-                    param_schema["type"] = "integer"
-                elif "bool" in param_type.lower():
-                    param_schema["type"] = "boolean"
-                elif "list" in param_type.lower() or "list of" in param_type.lower():
-                    param_schema = {"type": "array", "items": {"type": "string"}}
-                parameters.append({
-                    "name": param_name,
-                    "in": "query",
-                    "required": False,
-                    "schema": param_schema,
-                    "description": param_info.get("description", ""),
-                })
-            operation["parameters"] = parameters
-        else:
-            # requestBody with JSON schema
-            properties = {}
-            for param_name, param_info in params.items():
-                param_type = param_info.get("type", "")
-                if "int" in param_type or "int" in param_type.lower():
-                    param_schema = {"type": "integer"}
-                elif "bool" in param_type.lower():
-                    param_schema = {"type": "boolean"}
-                elif "list" in param_type.lower() or "list of" in param_type.lower():
-                    param_schema = {"type": "array", "items": {"type": "string"}}
-                else:
-                    param_schema = {"type": "string"}
-                param_schema["description"] = param_info.get("description", "")
-                properties[param_name] = param_schema
-            operation["requestBody"] = {
-                "content": {
-                    "application/json": {"schema": {"type": "object", "properties": properties}},
-                    "application/x-www-form-urlencoded": {"schema": {"type": "object", "properties": properties}},
-                }
-            }
-            operation["security"] = [{"ApiKeyAuth": []}]
-        spec["paths"].setdefault(path, {})[method.lower()] = operation
+def get_openapi_spec(*, force: bool = False) -> dict[str, Any]:
+    """Return the specification, using the configured cache when possible.
+
+    The cache is keyed on the settings that affect the generated document and
+    expires after ``ckanext.apidocs.cache_ttl`` seconds. A TTL of zero
+    disables caching entirely. The returned document is a copy, so callers
+    are free to modify it.
+    """
+    global _cache
+
+    ttl = config.apidocs_cache_ttl()
+    key = _cache_key()
+
+    if not force and ttl > 0 and _cache is not None:
+        cached_key, expires_at, cached_spec = _cache
+        if cached_key == key and expires_at > time.monotonic():
+            return copy.deepcopy(cached_spec)
+
+    spec = build_openapi_spec()
+    _cache = (key, time.monotonic() + ttl, spec)
+
+    return copy.deepcopy(spec)
+
+
+def invalidate_cache() -> None:
+    """Drop the cached specification, if any."""
+    global _cache
+    _cache = None
+
+
+def dumps_openapi_json(spec: dict[str, Any]) -> str:
+    """Serialize the specification as pretty printed JSON."""
+    return json.dumps(spec, indent=2)
+
+
+def dump_openapi_yaml(spec: dict[str, Any]) -> str:
+    """Serialize the specification as YAML."""
+    if yaml is None:  # pragma: no cover - optional dependency
+        log.warning(
+            "PyYAML is not installed, returning the specification as JSON"
+        )
+        return dumps_openapi_json(spec)
+
+    return yaml.safe_dump(
+        spec, sort_keys=False, allow_unicode=True, default_flow_style=False
+    )
+
+
+def spec_etag(payload: str) -> str:
+    """Return the ETag (unquoted) of a serialized specification."""
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def collect_badges(spec: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
+    """Index the ``x-badges`` of every operation by path and method.
+
+    The result is embedded into the page configuration so the browser does
+    not have to fetch and inspect the specification again.
+    """
+    badges: dict[str, dict[str, list[str]]] = {}
+
+    for path, operations in spec.get("paths", {}).items():
+        for method, operation in operations.items():
+            values = operation.get("x-badges")
+            if values:
+                badges.setdefault(path, {})[method] = list(values)
+
+    return badges
+
+
+def _build_operation(
+    action_name: str, info: utils.ActionInfo, parsed: utils.ParsedDocstring
+) -> dict[str, Any]:
+    badges = info.badges()
+    badges.extend(_interface_badges(action_name, info.origin))
+
+    kwargs: dict[str, Any] = {}
+    if info.method == "GET":
+        kwargs["parameters"] = schema.build_parameters(parsed.params_dict())
+    else:
+        kwargs["request_body"] = schema.build_request_body(
+            parsed.params_dict()
+        )
+
+    external_docs = None
+    if info.origin == utils.CORE_ORIGIN and info.module:
+        external_docs = schema.core_action_external_docs(
+            info.module, action_name, CKAN_VERSION
+        )
+
+    return schema.build_operation(
+        method=info.method,
+        summary=parsed.summary or action_name,
+        operation_id=action_name,
+        description=_compose_description(parsed),
+        badges=badges,
+        external_docs=external_docs,
+        **kwargs,
+    )
+
+
+def _compose_description(parsed: utils.ParsedDocstring) -> str:
+    chunks = [parsed.description] if parsed.description else []
+
+    if parsed.returns and parsed.returns_type:
+        returns = f"{parsed.returns} ({parsed.returns_type})"
+    elif parsed.returns:
+        returns = parsed.returns
+    elif parsed.returns_type:
+        returns = parsed.returns_type
+    else:
+        returns = ""
+
+    if returns:
+        chunks.append(f"**Returns:** {returns}")
+
+    return "\n\n".join(chunks)
+
+
+def _interface_badges(action_name: str, origin: str) -> list[str]:
+    badges: list[str] = []
+
+    for plugin in p.PluginImplementations(interfaces.IApidocs):
+        try:
+            extra = plugin.get_action_badges(action_name, origin)
+        except Exception:
+            log.exception(
+                "IApidocs.get_action_badges failed for action %s", action_name
+            )
+            continue
+
+        if extra:
+            badges.extend(str(badge) for badge in extra)
+
+    return badges
+
+
+def _apply_spec_extensions(spec: dict[str, Any]) -> dict[str, Any]:
+    """Let ``IApidocs`` implementations adjust the generated document."""
+    for plugin in p.PluginImplementations(interfaces.IApidocs):
+        try:
+            result = plugin.modify_openapi_spec(spec)
+        except Exception:
+            log.exception(
+                "IApidocs.modify_openapi_spec failed for plugin %s",
+                getattr(plugin, "name", type(plugin).__name__),
+            )
+            continue
+
+        if result is not None:
+            spec = result
 
     return spec
 
 
-def dump_openapi_yaml(spec: Dict[str, Any]) -> str:
-    if yaml is None:  # pragma: no cover - fallback
-        import json
-        return json.dumps(spec, indent=2)
-    return yaml.safe_dump(spec, sort_keys=False)
+def _cache_key() -> str:
+    parts = [
+        config.apidocs_base_path(),
+        config.apidocs_openapi_version(),
+        config.apidocs_title(),
+        config.apidocs_description(),
+        config.apidocs_spec_version(),
+        config.apidocs_token_header(),
+        ",".join(config.apidocs_allowed_api_methods()),
+        ",".join(config.apidocs_included_extensions()),
+        ",".join(config.apidocs_excluded_extensions()),
+    ]
+
+    return "|".join(parts)

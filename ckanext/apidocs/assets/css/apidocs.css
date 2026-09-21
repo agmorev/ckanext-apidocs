@@ -55,24 +55,27 @@
   height: auto;
 }
 
-.badge {
+/* Badges rendered next to the operation path (see `x-badges`) */
+.opblock-badge {
   display: inline-block;
+  margin-left: 6px;
   padding: 2px 6px;
   border-radius: 4px;
+  vertical-align: middle;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   color: #fff;
 }
-.badge-core {
-  background-color: #007bff; /* Blue */
+.opblock-badge.badge-core {
+  background-color: #1194df;
 }
-.badge-chained {
-  background-color: #28a745; /* Green */
+.opblock-badge.badge-chained {
+  background-color: #89bf04;
 }
-.badge-side-effect-free {
-  background-color: #fd7e14; /* Orange */
+.opblock-badge.badge-side-effect-free {
+  background-color: #fd7e14;
 }
-.badge-extension {
-  background-color: #6f42c1; /* Purple */
+.opblock-badge.badge-extension {
+  background-color: #7d8492;
 }

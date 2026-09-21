@@ -1,16 +1,8 @@
-"""Tests for validators.py."""
+"""Deprecated example tests, superseded by ``tests/test_utils.py``."""
 
 import pytest
 
-import ckan.plugins.toolkit as tk
-
-from ckanext.example.logic import validators
-
-
-def test_example_reauired_with_valid_value():
-    assert validators.example_required("value") == "value"
-
-
-def test_example_reauired_with_invalid_value():
-    with pytest.raises(tk.Invalid):
-        validators.example_required(None)
+pytest.skip(
+    "The example scaffolding was removed; see tests/test_utils.py",
+    allow_module_level=True,
+)

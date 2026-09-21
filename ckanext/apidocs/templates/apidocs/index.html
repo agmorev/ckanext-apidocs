@@ -1,23 +1,29 @@
 {% extends "page.html" %}
 
-{% block secondary %}
-{% endblock secondary %}
+{% block subtitle %}{{ title }}{% endblock %}
+
+{% block secondary %}{% endblock secondary %}
 
 {% block primary %}
     <div class="primary col-md-12 col-xs-12 apidocs" role="main">
 
     {% block primary_content %}
 
-        {% asset "apidocs/apidocs-js" %}
-        {% asset "apidocs/apidocs-css" %}
-
-        <div id="swagger-ui"></div>
+        <div id="swagger-ui" data-module="apidocs-swagger"></div>
 
     {% endblock primary_content %}
 
-    
-{% endblock primary%}
+    </div>
+{% endblock primary %}
+
+{% block styles %}
+    {{ super() }}
+    {% asset "apidocs/apidocs-css" %}
+{% endblock styles %}
 
 {% block scripts %}
-    <div class="hidden" data-module="swagger-badges"></div>
-{% endblock %}
+    {{ super() }}
+    <script id="apidocs-config" type="application/json">{{ apidocs_config | tojson }}</script>
+    {% asset "apidocs/apidocs-js" %}
+{% endblock scripts %}
+
