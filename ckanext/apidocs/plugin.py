@@ -9,14 +9,12 @@ from ckan.plugins import toolkit as tk
 from ckanext.apidocs import helpers, views
 
 
+@tk.blanket.actions
+@tk.blanket.auth_functions
 @tk.blanket.config_declarations
+@tk.blanket.validators
 class ApidocsPlugin(p.SingletonPlugin):
-    """Document the API of a CKAN instance with Swagger UI.
-
-    Config options are declared in ``ckanext/apidocs/config_declaration.yaml``
-    and loaded through the ``config_declarations`` blanket.
-    """
-
+    """Document the API of a CKAN instance with Swagger UI."""
     p.implements(p.IConfigurer)
     p.implements(p.IBlueprint)
     p.implements(p.IClick)

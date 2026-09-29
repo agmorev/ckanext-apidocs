@@ -36,15 +36,19 @@ To install ckanext-apidocs:
 
        ckan.plugins = ... apidocs
 
-4. Build the front-end assets if you are not running CKAN in debug mode:
+4. Create the tables storing the OpenAPI document edited by sysadmins:
+
+       ckan -c /etc/ckan/default/ckan.ini db upgrade -p apidocs
+
+5. Build the front-end assets if you are not running CKAN in debug mode:
 
        ckan -c /etc/ckan/default/ckan.ini asset build
 
-5. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
 
        sudo service apache2 reload
 
-6. Optionally, add a link to the documentation to your theme:
+7. Optionally, add a link to the documentation to your theme:
 
        <a href="{{ h.url_for('apidocs.index') }}">{{ _('CKAN API') }}</a>
 
@@ -64,6 +68,49 @@ The JSON and YAML endpoints send an `ETag` and support conditional requests
 built at most once per `ckanext.apidocs.cache_ttl` seconds; the HTTP cache
 lifetime of the responses is controlled by the core `ckan.cache_expires` and
 `ckan.cache_enabled` settings.
+
+
+## The OpenAPI document edited by sysadmins
+
+Sysadmins get an **API documentation** tab under `/ckan-admin/` (mounted at
+`/ckan-admin/apidocs/`) showing the document that is currently served:
+
+- While no document is stored, the tab is prefilled with the document
+generated from the registered actions, so it can be used as a starting point.
+- The document is edited as JSON or YAML. YAML is converted to JSON when the
+schema is saved; **Format** normalizes the content without saving it and
+**Load generated document** fetches the generated document without saving it.
+- Saving stores the document in the `apidocs_schema` database table, where
+every worker process picks it up without waiting for the cache to expire. The
+stored document is then served by `/api/docs/`, `/api/docs/ckanapi.json`,
+`/api/docs/ckanapi.yaml` (and their `openapi.*` aliases) instead of the
+generated one.
+- **Reset to generated** removes the stored document, so the documentation is
+generated from the registered actions again.
+
+Only the structural part of the specification the documentation page needs is
+validated on save: the document has to be an OpenAPI 3.x mapping with `info`
+(`title` and `version`) and `paths`. For a full validation, point
+`ckanext.apidocs.ui.validator_url` at a Swagger UI validator.
+
+The document is stored as JSON (a `JSONB` column), so whitespace is not
+preserved. Object key order is not preserved either — `jsonb` stores the keys
+sorted by length — so the extension stores and serves the document with every
+object key in **alphabetical order**. Sorting `paths` is what makes the
+documentation readable: the Swagger UI groups the operations into one section
+per HTTP method and lists each section in the order of `paths`, so every
+method section is alphabetical as well.
+
+The same document is available to sysadmins through the Action API, with the
+usual `Authorization` header:
+
+- `apidocs_schema_show` — the stored document, or `{}` when there is none
+- `apidocs_schema_update` — store a document (`definition`, JSON or YAML)
+- `apidocs_schema_delete` — remove the stored document
+
+Note that a stored document is served as is: it replaces the generated
+document completely, so `IApidocs.modify_openapi_spec` implementations and the
+automatically added badges are only applied to the generated document.
 
 
 ## Config settings
@@ -130,8 +177,12 @@ Export the generated specification, for example to feed another tool:
     ckan -c /etc/ckan/default/ckan.ini apidocs export - --format=json
     ckan -c /etc/ckan/default/ckan.ini apidocs export openapi.yaml
     ckan -c /etc/ckan/default/ckan.ini apidocs export --base-path=/api/3/action --version=2.11
+    ckan -c /etc/ckan/default/ckan.ini apidocs export --generated
 
 `-` (the default) writes to stdout, anything else is treated as a file path.
+The stored document is exported when there is one; `--generated` (or one of
+the overrides, which imply a rebuild) exports the document generated from the
+registered actions instead.
 
 
 ## Extending the specification

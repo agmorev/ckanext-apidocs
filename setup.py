@@ -14,6 +14,7 @@ setup(
         "ckanext/apidocs": [
             ("**.py", "python", None),
             ("assets/js/apidocs.js", "javascript", None),
+            ("assets/js/apidocs-schema-editor.js", "javascript", None),
             ("templates/**.html", "ckan", None),
         ],
     },

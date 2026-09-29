@@ -10,10 +10,14 @@ import time
 from collections.abc import Sequence
 from typing import Any
 
+from sqlalchemy.exc import DBAPIError, UnboundExecutionError
+
+from ckan import model as ckan_model
 from ckan import plugins as p
 
-from ckanext.apidocs import config, interfaces, utils
+from ckanext.apidocs import config, interfaces, model
 from ckanext.apidocs.schemas import schema
+from ckanext.apidocs.utils import actions, docstring
 
 try:
     import yaml
@@ -64,19 +68,19 @@ def build_openapi_spec(
         token_header=token_header,
     )
 
-    actions = utils.collect_actions(
+    discovered = actions.collect_actions(
         include_extensions=include_extensions,
         exclude_extensions=exclude_extensions,
     )
 
-    for action_name, info in actions.items():
+    for action_name, info in discovered.items():
         if action_name.startswith("_"):
             continue
 
         if info.method not in allowed_methods:
             continue
 
-        parsed = utils.parse_docstring(info.func.__doc__)
+        parsed = docstring.parse_docstring(info.func.__doc__)
         operation = _build_operation(action_name, info, parsed)
 
         paths = spec["paths"].setdefault(f"/{action_name}", {})
@@ -85,25 +89,50 @@ def build_openapi_spec(
     return _apply_spec_extensions(spec)
 
 
+def get_stored_schema() -> model.ApidocsSchema | None:
+    """The OpenAPI document stored by a sysadmin, if any.
+
+    A database that is unreachable, or that does not have the extension
+    tables yet, is reported as "nothing stored": serving the documentation
+    must not depend on the database being migrated.
+    """
+    try:
+        with ckan_model.Session.begin_nested():
+            return model.ApidocsSchema.get()
+    except (DBAPIError, UnboundExecutionError):
+        log.debug("cannot read the apidocs_schema table")
+        return None
+
+
 def get_openapi_spec(*, force: bool = False) -> dict[str, Any]:
     """Return the specification, using the configured cache when possible.
 
-    The cache is keyed on the settings that affect the generated document and
-    expires after ``ckanext.apidocs.cache_ttl`` seconds. A TTL of zero
-    disables caching entirely. The returned document is a copy, so callers
-    are free to modify it.
+    The document stored by a sysadmin (see the ``apidocs_admin`` views) is
+    served instead of the generated one, with its object keys in alphabetical
+    order, see :func:`ckanext.apidocs.utils.ordering.canonical_definition`. The
+    cache is keyed on the settings that affect the generated document and on
+    the version of the stored one, so a save is picked up by every worker
+    process without waiting for the TTL to expire. The cache expires after
+    ``ckanext.apidocs.cache_ttl`` seconds; a TTL of zero disables caching
+    entirely. The returned document is a copy, so callers are free to modify
+    it.
     """
     global _cache
 
     ttl = config.apidocs_cache_ttl()
-    key = _cache_key()
+    key = _cache_key(_stored_schema_fingerprint())
 
     if not force and ttl > 0 and _cache is not None:
         cached_key, expires_at, cached_spec = _cache
         if cached_key == key and expires_at > time.monotonic():
             return copy.deepcopy(cached_spec)
 
-    spec = build_openapi_spec()
+    stored = get_stored_schema()
+    spec = (
+        stored.canonical_definition
+        if stored is not None
+        else build_openapi_spec()
+    )
     _cache = (key, time.monotonic() + ttl, spec)
 
     return copy.deepcopy(spec)
@@ -113,6 +142,25 @@ def invalidate_cache() -> None:
     """Drop the cached specification, if any."""
     global _cache
     _cache = None
+
+
+def _stored_schema_fingerprint() -> str | None:
+    """Cheap change marker of the stored document.
+
+    Reading the version counter costs a single lookup of a tiny row, while
+    the document itself can be large, so the fingerprint is what the cache is
+    keyed on. ``None`` means "cannot tell" (no database or no tables), which
+    keeps the cache usable and makes every call fall back to the generated
+    document.
+    """
+    try:
+        with ckan_model.Session.begin_nested():
+            version, updated = model.ApidocsSchemaState.fingerprint()
+    except (DBAPIError, UnboundExecutionError):
+        log.debug("cannot read the apidocs_schema_state table")
+        return None
+
+    return f"{version}@{updated.isoformat() if updated else ''}"
 
 
 def dumps_openapi_json(spec: dict[str, Any]) -> str:
@@ -156,7 +204,7 @@ def collect_badges(spec: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
 
 
 def _build_operation(
-    action_name: str, info: utils.ActionInfo, parsed: utils.ParsedDocstring
+    action_name: str, info: actions.ActionInfo, parsed: docstring.ParsedDocstring
 ) -> dict[str, Any]:
     badges = info.badges()
     badges.extend(_interface_badges(action_name, info.origin))
@@ -170,7 +218,7 @@ def _build_operation(
         )
 
     external_docs = None
-    if info.origin == utils.CORE_ORIGIN and info.module:
+    if info.origin == actions.CORE_ORIGIN and info.module:
         external_docs = schema.core_action_external_docs(
             info.module, action_name, CKAN_VERSION
         )
@@ -186,7 +234,7 @@ def _build_operation(
     )
 
 
-def _compose_description(parsed: utils.ParsedDocstring) -> str:
+def _compose_description(parsed: docstring.ParsedDocstring) -> str:
     chunks = [parsed.description] if parsed.description else []
 
     if parsed.returns and parsed.returns_type:
@@ -240,8 +288,9 @@ def _apply_spec_extensions(spec: dict[str, Any]) -> dict[str, Any]:
     return spec
 
 
-def _cache_key() -> str:
+def _cache_key(fingerprint: str | None = None) -> str:
     parts = [
+        str(fingerprint),
         config.apidocs_base_path(),
         config.apidocs_openapi_version(),
         config.apidocs_title(),

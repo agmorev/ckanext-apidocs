@@ -8,7 +8,14 @@ import ckan.plugins as p
 from ckan.plugins import toolkit as tk
 
 from ckanext.apidocs import helpers
+from ckanext.apidocs.model import ApidocsSchema
 from ckanext.apidocs.schemas import schema
+from ckanext.apidocs.tests.data import (
+    MINIMAL_SPEC,
+    UNSORTED_SPEC,
+    UNSORTED_SPEC_KEYS,
+    UNSORTED_SPEC_PATHS,
+)
 
 from .test_utils import FakeActionsPlugin, _implementations
 
@@ -274,3 +281,72 @@ def test_collect_badges_ignores_operations_without_badges():
     }
 
     assert helpers.collect_badges(spec) == {}
+
+
+# stored document
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_get_stored_schema_is_empty_without_a_stored_document():
+    assert helpers.get_stored_schema() is None
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_the_stored_document_is_served_instead_of_the_generated_one():
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    spec = helpers.get_openapi_spec()
+
+    assert spec == MINIMAL_SPEC
+    assert "/package_show" not in spec["paths"]
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_removing_the_stored_document_falls_back_to_the_generated_one():
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    assert helpers.get_openapi_spec() == MINIMAL_SPEC
+
+    row = ApidocsSchema.get()
+    assert row is not None
+    row.delete()
+
+    assert "/package_show" in helpers.get_openapi_spec()["paths"]
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_saving_a_document_invalidates_the_cache():
+    first = helpers.get_openapi_spec()
+
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    # the version of the stored document is part of the cache key, so a save
+    # made by another worker process is picked up without waiting for the TTL
+    assert helpers.get_openapi_spec() != first
+    assert helpers.get_openapi_spec() == MINIMAL_SPEC
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_the_served_stored_document_is_in_alphabetical_order():
+    ApidocsSchema.set_definition(dict(UNSORTED_SPEC))
+
+    spec = helpers.get_openapi_spec()
+
+    assert list(spec) == UNSORTED_SPEC_KEYS
+    assert list(spec["paths"]) == UNSORTED_SPEC_PATHS
+    assert spec == UNSORTED_SPEC
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_the_returned_stored_document_is_a_copy():
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    helpers.get_openapi_spec()["info"]["title"] = "Changed"
+
+    assert helpers.get_openapi_spec()["info"]["title"] == "Custom API"

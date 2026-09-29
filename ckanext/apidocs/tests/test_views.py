@@ -10,6 +10,8 @@ from ckan.plugins import toolkit as tk
 from ckan.tests import factories
 
 from ckanext.apidocs import helpers
+from ckanext.apidocs.model import ApidocsSchema
+from ckanext.apidocs.tests.data import MINIMAL_SPEC
 
 
 INDEX_URL = "/api/docs/"
@@ -109,6 +111,40 @@ def test_ckanapi_yaml(app, url):
 
     assert payload["openapi"] == "3.0.0"
     assert "/package_show" in payload["paths"]
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_ckanapi_json_serves_the_stored_document(app):
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    payload = json.loads(app.get(JSON_URL).body)
+
+    assert "/custom_action" in payload["paths"]
+    assert "/package_show" not in payload["paths"]
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_ckanapi_yaml_serves_the_stored_document(app):
+    yaml = pytest.importorskip("yaml")
+
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    payload = yaml.safe_load(app.get(YAML_URL).body)
+
+    assert "/custom_action" in payload["paths"]
+    assert "/package_show" not in payload["paths"]
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+def test_the_etag_changes_when_a_document_is_stored(app):
+    default = app.get(JSON_URL).headers["ETag"]
+
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    assert app.get(JSON_URL).headers["ETag"] != default
 
 
 @pytest.mark.ckan_config("ckan.plugins", "apidocs")

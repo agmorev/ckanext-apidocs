@@ -1,4 +1,9 @@
-"""Web views of the API documentation."""
+"""Web views of the API documentation.
+
+The blueprint serves the Swagger UI page and the OpenAPI documents at
+``/api/docs/``. The document is the one stored by a sysadmin when there is
+one, otherwise it is generated from the registered actions.
+"""
 
 from __future__ import annotations
 
@@ -8,13 +13,12 @@ from flask.wrappers import Response
 from ckan.plugins import toolkit as tk
 
 from ckanext.apidocs import config, helpers
-from ckanext.apidocs.admin import bp as admin_bp
 
 
-apidocs = Blueprint("apidocs", __name__, url_prefix="/api/docs/")
+bp = Blueprint("apidocs", __name__, url_prefix="/api/docs/")
 
 
-@apidocs.before_request
+@bp.before_request
 def _restrict_access():
     """Optionally restrict the documentation to authenticated users.
 
@@ -96,23 +100,19 @@ def _spec_response(payload: str, mimetype: str) -> Response:
     return response
 
 
-apidocs.add_url_rule("/", endpoint="index", view_func=index)
+bp.add_url_rule("/", endpoint="index", view_func=index)
 
-apidocs.add_url_rule(
+bp.add_url_rule(
     "/ckanapi.json", endpoint="ckanapi_json", view_func=ckanapi_json
 )
-apidocs.add_url_rule(
+bp.add_url_rule(
     "/ckanapi.yaml", endpoint="ckanapi_yaml", view_func=ckanapi_yaml
 )
 
 # Aliases following the OpenAPI naming convention
-apidocs.add_url_rule(
+bp.add_url_rule(
     "/openapi.json", endpoint="openapi_json", view_func=ckanapi_json
 )
-apidocs.add_url_rule(
+bp.add_url_rule(
     "/openapi.yaml", endpoint="openapi_yaml", view_func=ckanapi_yaml
 )
-
-
-def get_blueprints():
-    return [apidocs, admin_bp]

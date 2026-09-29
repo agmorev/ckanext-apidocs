@@ -16,3 +16,12 @@ apidocs-css:
   contents:
     - css/apidocs.css
     - css/swagger-ui.css
+
+apidocs-admin-js:
+  filter: rjsmin
+  output: ckanext-apidocs/%(version)s-apidocs-admin.js
+  contents:
+    - js/apidocs-schema-editor.js
+  extra:
+    preload:
+      - base/main

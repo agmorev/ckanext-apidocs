@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+
+{% import 'macros/form.html' as form %}
+
+{% block subtitle %}{{ _('API documentation schema') }}{% endblock %}
+
+{% block primary_content_inner %}
+  <h2>{{ _('API documentation schema') }}</h2>
+
+  {% if stored %}
+    <p class="text-muted">
+      {%- trans updated=h.render_datetime(stored.updated, with_hours=True) -%}
+        The documentation is served from the schema stored on {{ updated }}.
+        The document generated from the registered actions is not used while
+        a schema is stored.
+      {%- endtrans -%}
+    </p>
+  {% else %}
+    <p class="text-muted">
+      {%- trans -%}
+        The documentation is generated from the registered actions. Edit the
+        document below and save it to serve it instead of the generated one.
+      {%- endtrans -%}
+    </p>
+  {% endif %}
+
+  <form method="post" action="{{ h.url_for('apidocs_admin.save') }}" id="apidocs-schema-form">
+    {{ h.csrf_input() }}
+    {{ form.errors(error_summary) }}
+
+    {{ form.textarea('definition',
+                     id='field-definition',
+                     label=_('OpenAPI document (JSON or YAML)'),
+                     value=data.definition,
+                     error=errors.definition,
+                     rows=30,
+                     is_required=true,
+                     attrs={'class': 'form-control',
+                            'data-module': 'apidocs-schema-editor',
+                            'data-module-format-url': h.url_for('apidocs_admin.format'),
+                            'data-module-generated-url': h.url_for('apidocs_admin.generated')}) }}
+
+    <div class="form-actions">
+      {% if stored %}
+        {# The link lives in the same form as the submit button on purpose:
+           `confirm-action` builds the POST request from its `href`, so the
+           stored schema is removed without touching the edited document. #}
+        <a href="{{ h.url_for('apidocs_admin.reset') }}"
+           class="btn btn-danger"
+           data-module="confirm-action"
+           data-module-content="{{ _('The stored schema will be removed and the documentation generated from the registered actions again. Continue?') }}"
+           aria-label="{{ _('Reset to generated') }}"
+           data-bs-title="{{ _('Reset to generated') }}"
+           data-bs-toggle="tooltip">
+          {{ _('Reset to generated') }}
+        </a>
+      {% endif %}
+
+      <button class="btn btn-primary" type="submit" name="save">
+        {{ _('Save schema') }}
+      </button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block secondary_content %}
+  <div class="module module-narrow module-shallow">
+    <div class="module-group">
+      <h2 class="module-heading">
+        <i class="fa fa-info-circle"></i>
+        {{ _('Schema definition') }}
+      </h2>
+      <div class="module-content">
+        {% trans %}
+          <p>The document below is the OpenAPI document served at
+            <code>/api/docs/</code>. It is stored in the database, so it is
+            shared by every worker process and survives restarts.</p>
+          <p>JSON and YAML are accepted. YAML is converted to JSON when the
+            schema is saved, and every save replaces the whole document.</p>
+          <p>While no schema is stored, the document is generated from the
+            actions registered by CKAN and the enabled extensions.</p>
+          <p>Use <strong>Reset to generated</strong> to remove the stored
+            schema and serve the generated document again.</p>
+        {% endtrans %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  {% asset 'apidocs/apidocs-admin-js' %}
+{% endblock %}

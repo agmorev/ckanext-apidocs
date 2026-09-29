@@ -73,11 +73,11 @@ def test_plugin_implements_the_expected_interfaces():
         p.IConfigDeclaration,
         p.IBlueprint,
         p.IClick,
+        p.IActions,
+        p.IAuthFunctions,
+        p.IValidators,
     ):
         assert interface.implemented_by(plugin.ApidocsPlugin), interface
-
-    # the example scaffolding was removed
-    assert not p.IActions.implemented_by(plugin.ApidocsPlugin)
 
 
 def test_plugin_declares_the_configuration():
@@ -115,3 +115,22 @@ def test_example_actions_are_not_registered():
 
     assert "apidocs_example" not in logic._actions
     assert "example_get_sum" not in logic._actions
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins")
+def test_schema_actions_are_registered():
+    for action in (
+        "apidocs_schema_update",
+        "apidocs_schema_show",
+        "apidocs_schema_delete",
+    ):
+        assert action in logic._actions, action
+
+
+@pytest.mark.ckan_config("ckan.plugins", "apidocs")
+@pytest.mark.usefixtures("with_plugins")
+def test_the_document_validator_is_registered():
+    from ckan.logic import get_validator
+
+    assert get_validator("apidocs_definition_valid")

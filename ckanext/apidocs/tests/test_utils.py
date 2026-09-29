@@ -8,7 +8,7 @@ import pytest
 
 import ckan.plugins as p
 
-from ckanext.apidocs import utils
+from ckanext.apidocs.utils import actions, docstring
 
 
 DOCSTRING = """
@@ -67,7 +67,7 @@ def _implementations(interface, *plugins):
 
 
 def test_parse_docstring_extracts_summary_description_and_params():
-    parsed = utils.parse_docstring(DOCSTRING)
+    parsed = docstring.parse_docstring(DOCSTRING)
 
     assert parsed.summary == "Return the metadata of a dataset."
     assert parsed.description == "A longer description\nspanning two lines."
@@ -85,7 +85,7 @@ def test_parse_docstring_extracts_summary_description_and_params():
 
 
 def test_summary_joins_the_wrapped_lines_of_the_first_paragraph():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Show the data from an item of 'activity' (part of the activity\n"
         "stream).\n"
         "\n"
@@ -102,7 +102,7 @@ def test_summary_joins_the_wrapped_lines_of_the_first_paragraph():
 
 
 def test_summary_stops_at_the_first_paragraph():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary wrapped\n"
         "over two lines.\n"
         "\n"
@@ -117,7 +117,7 @@ def test_summary_stops_at_the_first_paragraph():
 
 
 def test_summary_stops_at_the_directives_without_a_blank_line():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary wrapped\nover two lines.\n:param id: the id\n"
     )
 
@@ -127,7 +127,7 @@ def test_summary_stops_at_the_directives_without_a_blank_line():
 
 
 def test_returns_text_does_not_leak_into_parameters():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary.\n"
         "\n"
         ":param id: the id\n"
@@ -142,7 +142,7 @@ def test_returns_text_does_not_leak_into_parameters():
 
 
 def test_parameter_types_with_multiple_words():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary.\n"
         "\n"
         ":param list of strings ids: the ids\n"
@@ -153,7 +153,7 @@ def test_parameter_types_with_multiple_words():
 
 
 def test_required_parameters_are_detected():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary.\n"
         "\n"
         ":param id: the id of the dataset (required)\n"
@@ -165,7 +165,7 @@ def test_required_parameters_are_detected():
 
 
 def test_parse_docstring_renders_notes_and_raises():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary.\n"
         "\n"
         ".. note:: Only sysadmins can use this.\n"
@@ -178,7 +178,7 @@ def test_parse_docstring_renders_notes_and_raises():
 
 @pytest.mark.parametrize("value", [None, "", "\n\n", "   "])
 def test_parse_docstring_handles_empty_input(value):
-    parsed = utils.parse_docstring(value)
+    parsed = docstring.parse_docstring(value)
 
     assert parsed.summary == ""
     assert parsed.description == ""
@@ -187,7 +187,7 @@ def test_parse_docstring_handles_empty_input(value):
 
 
 def test_parse_docstring_ignores_malformed_directives():
-    parsed = utils.parse_docstring(
+    parsed = docstring.parse_docstring(
         "Summary.\n\n:param without colon\n:type\n:returns\n"
     )
 
@@ -196,7 +196,7 @@ def test_parse_docstring_ignores_malformed_directives():
 
 
 def test_params_dict_exposes_plain_dicts():
-    params = utils.parse_docstring(DOCSTRING).params_dict()
+    params = docstring.parse_docstring(DOCSTRING).params_dict()
 
     assert params["id"] == {
         "name": "id",
@@ -215,7 +215,7 @@ def test_infer_method_from_module_name():
 
     action.__module__ = "ckan.logic.action.update"
 
-    assert utils.infer_method("some_action", action) == "PUT"
+    assert actions.infer_method("some_action", action) == "PUT"
 
 
 def test_infer_method_from_side_effect_free_marker():
@@ -224,7 +224,7 @@ def test_infer_method_from_side_effect_free_marker():
 
     action.side_effect_free = True  # type: ignore[attr-defined]
 
-    assert utils.infer_method("some_action", action) == "GET"
+    assert actions.infer_method("some_action", action) == "GET"
 
 
 @pytest.mark.parametrize(
@@ -242,7 +242,7 @@ def test_infer_method_from_action_name(name, expected):
     def action(context, data_dict):
         pass
 
-    assert utils.infer_method(name, action) == expected
+    assert actions.infer_method(name, action) == expected
 
 
 def test_infer_method_respects_the_explicit_attribute():
@@ -251,7 +251,7 @@ def test_infer_method_respects_the_explicit_attribute():
 
     action.apidocs_method = "patch"  # type: ignore[attr-defined]
 
-    assert utils.infer_method("package_show", action) == "PATCH"
+    assert actions.infer_method("package_show", action) == "PATCH"
 
 
 # collect_actions
@@ -262,15 +262,15 @@ def test_collect_actions_includes_core_and_plugin_actions(monkeypatch):
         p, "PluginImplementations", _implementations(p.IActions, FakeActionsPlugin())
     )
 
-    actions = utils.collect_actions()
+    collected = actions.collect_actions()
 
-    assert actions["package_show"].method == "GET"
-    assert actions["package_show"].origin == utils.CORE_ORIGIN
-    assert actions["package_show"].module == "get"
-    assert actions["package_create"].method == "POST"
-    assert actions["fake_list"].method == "GET"
-    assert actions["fake_thing"].method == "POST"
-    assert actions["fake_list"].origin == "fake"
+    assert collected["package_show"].method == "GET"
+    assert collected["package_show"].origin == actions.CORE_ORIGIN
+    assert collected["package_show"].module == "get"
+    assert collected["package_create"].method == "POST"
+    assert collected["fake_list"].method == "GET"
+    assert collected["fake_thing"].method == "POST"
+    assert collected["fake_list"].origin == "fake"
 
 
 def test_collect_actions_can_exclude_plugins(monkeypatch):
@@ -278,10 +278,10 @@ def test_collect_actions_can_exclude_plugins(monkeypatch):
         p, "PluginImplementations", _implementations(p.IActions, FakeActionsPlugin())
     )
 
-    actions = utils.collect_actions(exclude_extensions=["fake"])
+    collected = actions.collect_actions(exclude_extensions=["fake"])
 
-    assert "fake_thing" not in actions
-    assert "package_show" in actions
+    assert "fake_thing" not in collected
+    assert "package_show" in collected
 
 
 def test_collect_actions_can_restrict_plugins(monkeypatch):
@@ -289,10 +289,10 @@ def test_collect_actions_can_restrict_plugins(monkeypatch):
         p, "PluginImplementations", _implementations(p.IActions, FakeActionsPlugin())
     )
 
-    actions = utils.collect_actions(include_extensions=["other"])
+    collected = actions.collect_actions(include_extensions=["other"])
 
-    assert "fake_thing" not in actions
-    assert "package_show" in actions
+    assert "fake_thing" not in collected
+    assert "package_show" in collected
 
 
 def test_collect_actions_logs_and_skips_broken_plugins(monkeypatch, log_capture):
@@ -302,10 +302,10 @@ def test_collect_actions_logs_and_skips_broken_plugins(monkeypatch, log_capture)
         _implementations(p.IActions, BrokenActionsPlugin()),
     )
 
-    with log_capture(utils.__name__) as records:
-        actions = utils.collect_actions()
+    with log_capture(actions.__name__) as records:
+        collected = actions.collect_actions()
 
-    assert "package_show" in actions
+    assert "package_show" in collected
     assert any(
         "Failed to collect actions" in record.getMessage()
         for record in records
@@ -320,21 +320,21 @@ def test_collect_actions_skips_non_callable_actions(monkeypatch):
         _implementations(p.IActions, WeirdActionsPlugin()),
     )
 
-    actions = utils.collect_actions()
+    collected = actions.collect_actions()
 
-    assert "weird_action" not in actions
+    assert "weird_action" not in collected
 
 
 def test_collect_actions_returns_actions_sorted_by_name():
-    names = list(utils.collect_actions())
+    names = list(actions.collect_actions())
 
     assert names == sorted(names)
 
 
 def test_actions_carry_badges():
-    actions = utils.collect_actions()
+    collected = actions.collect_actions()
 
-    badges = actions["package_show"].badges()
+    badges = collected["package_show"].badges()
 
     assert "core" in badges
 
@@ -344,7 +344,7 @@ def test_actions_carry_badges():
 
 @pytest.mark.ckan_config("ckanext.apidocs.enable_api_methods", "get post")
 def test_get_api_methods_reads_the_configuration(ckan_config):
-    assert [method["name"] for method in utils.get_api_methods()] == [
+    assert [method["name"] for method in actions.get_api_methods()] == [
         "GET",
         "POST",
     ]

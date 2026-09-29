@@ -5,6 +5,37 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-09-30
+
+### Added
+
+- Sysadmin page at `/ckan-admin/apidocs/` (tab **API documentation** under
+  `/ckan-admin/`) to edit the OpenAPI document served by the documentation.
+  The document is prefilled with the generated one, is edited as JSON or YAML
+  and is stored in the new `apidocs_schema` table, from where it is served by
+  the documentation endpoints instead of the generated document. The
+  **Format** action normalizes JSON/YAML, **Load generated document** fetches
+  the generated document, and **Reset to generated** removes the stored one.
+- Actions managing the stored document, all sysadmin-only:
+  `apidocs_schema_show`, `apidocs_schema_update` and `apidocs_schema_delete`.
+- `apidocs_schema_state` table with a version counter, so every worker process
+  picks up a saved document without waiting for `ckanext.apidocs.cache_ttl`.
+- Migrations of the extension (`ckan db upgrade -p apidocs`) creating both
+  tables. They have to be applied after upgrading an existing installation.
+- The stored document is saved and served with every object key in
+  alphabetical order. `JSONB` does not preserve key order, so the order is
+  restored on read; alphabetical `paths` also make the operations of every
+  HTTP method section of the Swagger UI alphabetical, since the UI lists them
+  in the order of `paths`.
+- `apidocs export --generated` option, exporting the document generated from
+  the registered actions instead of the stored one. Without the flag the
+  stored document is exported when there is one.
+
+### Changed
+- Dependencies are declared only in `pyproject.toml`: `PyYAML` under
+  `[project] dependencies` and the dev tools under the `dev` extra. The
+  `requirements.txt` and `dev-requirements.txt` files were removed.
+
 ## [0.1.0] - 2026-09-20
 
 First production release. Compatible with CKAN 2.11 and 2.12.

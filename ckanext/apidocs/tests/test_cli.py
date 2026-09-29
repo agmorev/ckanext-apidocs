@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 
 from ckanext.apidocs import cli as apidocs_cli
+from ckanext.apidocs.model import ApidocsSchema
+from ckanext.apidocs.tests.data import MINIMAL_SPEC
 
 
 def test_export_writes_yaml_to_stdout(cli):
@@ -49,6 +51,34 @@ def test_export_accepts_overrides(cli):
 
     assert payload["servers"] == [{"url": "/api/4/action"}]
     assert payload["info"]["version"] == "9.9.9"
+
+
+def test_export_uses_the_stored_document(cli, clean_db, with_plugins):
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    result = cli.invoke(apidocs_cli.apidocs, ["export", "--format=json"])
+
+    assert not result.exit_code, result.output
+
+    payload = json.loads(result.output)
+
+    assert "/custom_action" in payload["paths"]
+    assert "/package_show" not in payload["paths"]
+
+
+def test_export_can_ignore_the_stored_document(cli, clean_db, with_plugins):
+    ApidocsSchema.set_definition(dict(MINIMAL_SPEC))
+
+    result = cli.invoke(
+        apidocs_cli.apidocs, ["export", "--format=json", "--generated"]
+    )
+
+    assert not result.exit_code, result.output
+
+    payload = json.loads(result.output)
+
+    assert "/package_show" in payload["paths"]
+    assert "/custom_action" not in payload["paths"]
 
 
 def test_export_reports_unwritable_target(cli, tmp_path):

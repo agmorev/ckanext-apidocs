@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-apidocs"
-version = "0.1.0"
+version = "0.1.1"
 description = "Document CKAN's Action API with OpenAPI and Swagger UI"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -61,7 +61,7 @@ select = ["E", "F", "W", "C901", "PLW0602"]
 [tool.mypy]
 python_version = "3.11"
 files = ["ckanext/apidocs"]
-exclude = ["ckanext/apidocs/tests"]
+exclude = ["ckanext/apidocs/tests", "ckanext/apidocs/migration"]
 check_untyped_defs = true
 ignore_missing_imports = true
 warn_unused_ignores = false

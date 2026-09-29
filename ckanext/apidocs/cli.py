@@ -33,13 +33,33 @@ def apidocs():
     help="Version advertised in the OpenAPI document. Defaults to the "
     "ckanext.apidocs.spec_version setting.",
 )
-def export(output: str, fmt: str, base_path: str | None, version: str | None):
+@click.option(
+    "--generated",
+    is_flag=True,
+    help="Export the document generated from the registered actions, "
+    "ignoring the schema stored by a sysadmin.",
+)
+def export(
+    output: str,
+    fmt: str,
+    base_path: str | None,
+    version: str | None,
+    generated: bool,
+):
     """Export the OpenAPI specification of the actions.
+
+    The schema stored by a sysadmin is exported when there is one, exactly
+    as the documentation endpoints serve it. Use ``--generated`` (or one of
+    the overrides, which imply a rebuild) to export the document generated
+    from the registered actions instead.
 
     When OUTPUT is "-" (the default) the specification is written to
     stdout, otherwise it is written to the given file.
     """
-    spec = helpers.build_openapi_spec(base_path=base_path, version=version)
+    if generated or base_path is not None or version is not None:
+        spec = helpers.build_openapi_spec(base_path=base_path, version=version)
+    else:
+        spec = helpers.get_openapi_spec()
 
     if fmt == "yaml":
         content = helpers.dump_openapi_yaml(spec)

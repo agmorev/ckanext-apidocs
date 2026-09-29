@@ -1,7 +1,7 @@
 include README.md
 include CHANGELOG.md
 include LICENSE
-include requirements.txt
 include pyproject.toml
 recursive-include ckanext/apidocs *.html *.js *.css *.yml *.yaml *.png *.md
+recursive-include ckanext/apidocs/migration *.ini *.py *.mako *.md README
 recursive-include ckanext/apidocs/i18n *.pot *.po *.mo
